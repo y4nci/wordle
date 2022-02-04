@@ -104,6 +104,8 @@ class Window(QtWidgets.QMainWindow):
 
     def show_stats(self):
         self.buttons = list()
+        self.num = 1
+        self.word = wordle.random_word()
         stats = QtWidgets.QLabel(wordle.fetch_data())
         back_button = QtWidgets.QPushButton("back")
         stat_layout = QtWidgets.QVBoxLayout()
