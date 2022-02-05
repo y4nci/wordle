@@ -8,18 +8,20 @@ from PyQt5.QtWidgets import QMessageBox
 class Window(QtWidgets.QMainWindow):
     def __init__(self):
         super().__init__()
+        self.guess_button = None
         self.word = wordle.random_word()
         self.buttons = list()
+        self.output = list()
         self.num = 1
         self.init_ui()
         self.msg = QMessageBox()
-        self.output = list()
 
     def init_ui(self):
         main_layout = QtWidgets.QVBoxLayout()
         grid = QtWidgets.QGridLayout()
-        guess_button = QtWidgets.QPushButton("guess")
+        self.guess_button = QtWidgets.QPushButton("guess")
         stat_button = QtWidgets.QPushButton("show stats")
+        newgame_button = QtWidgets.QPushButton("new game")
 
         positions = [(i, j) for i in range(6) for j in range(5)]
 
@@ -34,11 +36,13 @@ class Window(QtWidgets.QMainWindow):
         for i in range(self.num * 5, 30):
             self.buttons[i].setReadOnly(True)
 
-        guess_button.clicked.connect(self.guess)
+        self.guess_button.clicked.connect(self.guess)
         stat_button.clicked.connect(self.show_stats)
+        newgame_button.clicked.connect(self.new_game)
         main_layout.addLayout(grid)
-        main_layout.addWidget(guess_button)
+        main_layout.addWidget(self.guess_button)
         main_layout.addWidget(stat_button)
+        main_layout.addWidget(newgame_button)
 
         central = QtWidgets.QWidget(self)
         self.setCentralWidget(central)
@@ -91,8 +95,9 @@ class Window(QtWidgets.QMainWindow):
             self.msg.setText(f"The word was {self.word}")
             self.msg.setDefaultButton(restart_button)
             self.msg.setIcon(QMessageBox.Information)
-            self.msg.buttonClicked.connect(self.restart)
+            # self.msg.buttonClicked.connect(self.restart)
             self.msg.show()
+            self.restart()
 
         elif self.num == 7:
             restart_button = QtWidgets.QPushButton("Restart")
@@ -100,8 +105,9 @@ class Window(QtWidgets.QMainWindow):
             self.msg.setText(f"The word was {self.word}")
             self.msg.setDefaultButton(restart_button)
             self.msg.setIcon(QMessageBox.Critical)
-            self.msg.buttonClicked.connect(self.restart)
+            # self.msg.buttonClicked.connect(self.restart)
             self.msg.show()
+            self.restart()
 
     def show_stats(self):
         self.buttons = list()
@@ -120,17 +126,7 @@ class Window(QtWidgets.QMainWindow):
 
         self.show()
 
-    def restart(self):
-        if self.num == 7:
-            if self.output == [2, 2, 2, 2, 2]:
-                wordle.update_data(self.num - 1, True)
-
-            else:    
-                wordle.update_data(-1, False)
-
-        else:
-            wordle.update_data(self.num - 1, True)
-
+    def new_game(self):
         self.num = 1
         self.word = wordle.random_word()
 
@@ -148,6 +144,23 @@ class Window(QtWidgets.QMainWindow):
                                  "{"
                                  "background : white;"
                                  "}")
+
+        self.guess_button.setEnabled(True)
+
+        #{"total guesses": 42, "total games": 8, "total successful": 3, "total unsuccessful": 5, "success rate": "%37.5", "correct in": [0, 0, 2, 0, 0, 1]}
+
+    def restart(self):
+        if self.num == 7:
+            if self.output == [2, 2, 2, 2, 2]:
+                wordle.update_data(self.num - 1, True)
+
+            else:
+                wordle.update_data(-1, False)
+
+        else:
+            wordle.update_data(self.num - 1, True)
+
+        self.guess_button.setEnabled(False)
 
 
 if __name__ == "__main__":
