@@ -64,6 +64,7 @@ def update_data(num, successful, imported=True):
 
     if num != -1:
         jsondata["correct in"][num - 1] += 1
+        jsondata["total guesses"] += (num - 1)
 
     else:
         jsondata["total guesses"] += 6
