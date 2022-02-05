@@ -13,6 +13,7 @@ class Window(QtWidgets.QMainWindow):
         self.num = 1
         self.init_ui()
         self.msg = QMessageBox()
+        self.output = list()
 
     def init_ui(self):
         main_layout = QtWidgets.QVBoxLayout()
@@ -59,18 +60,18 @@ class Window(QtWidgets.QMainWindow):
             if i < 25: self.buttons[i + 5].setReadOnly(False)
             letters.append(self.buttons[i].text() + (self.buttons[i].text() == "") * ".")
 
-        output = wordle.evaluate_guess(letters, self.word)
+        self.output = wordle.evaluate_guess(letters, self.word)
 
         for i in range(5):
-            sum += output[i]
+            sum += self.output[i]
 
-            if output[i] == 2:
+            if self.output[i] == 2:
                 self.buttons[(self.num - 1) * 5 + i].setStyleSheet("QLineEdit"
                                                                    "{"
                                                                    "background : lightgreen;"
                                                                    "}")
 
-            elif output[i] == 1:
+            elif self.output[i] == 1:
                 self.buttons[(self.num - 1) * 5 + i].setStyleSheet("QLineEdit"
                                                                    "{"
                                                                    "background : lightblue;"
@@ -84,21 +85,21 @@ class Window(QtWidgets.QMainWindow):
 
         self.num += 1
 
-        if self.num == 7:
-            restart_button = QtWidgets.QPushButton("Restart")
-            self.msg.setWindowTitle("Wrong!")
-            self.msg.setText(f"The word was {self.word}")
-            self.msg.setDefaultButton(restart_button)
-            self.msg.setIcon(QMessageBox.Critical)
-            self.msg.buttonClicked.connect(self.restart)
-            self.msg.show()
-
-        elif sum == 10:
+        if sum == 10:
             restart_button = QtWidgets.QPushButton("Restart")
             self.msg.setWindowTitle("Correct!")
             self.msg.setText(f"The word was {self.word}")
             self.msg.setDefaultButton(restart_button)
             self.msg.setIcon(QMessageBox.Information)
+            self.msg.buttonClicked.connect(self.restart)
+            self.msg.show()
+
+        elif self.num == 7:
+            restart_button = QtWidgets.QPushButton("Restart")
+            self.msg.setWindowTitle("Wrong!")
+            self.msg.setText(f"The word was {self.word}")
+            self.msg.setDefaultButton(restart_button)
+            self.msg.setIcon(QMessageBox.Critical)
             self.msg.buttonClicked.connect(self.restart)
             self.msg.show()
 
@@ -121,7 +122,11 @@ class Window(QtWidgets.QMainWindow):
 
     def restart(self):
         if self.num == 7:
-            wordle.update_data(-1, False)
+            if self.output == [2, 2, 2, 2, 2]:
+                wordle.update_data(self.num - 1, True)
+
+            else:    
+                wordle.update_data(-1, False)
 
         else:
             wordle.update_data(self.num - 1, True)
